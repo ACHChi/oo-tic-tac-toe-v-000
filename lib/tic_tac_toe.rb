@@ -26,24 +26,80 @@ class TicTacToe
     user_input.to_i - 1
   end
 
-  def move(board, index, current_player = "X")
+  def move(index, current_player = "X")
     @board[index] = current_player
   end
 
-  def position_taken?(board, index)
+  def position_taken?(index)
     @board[index] != " "
   end
 
+  def valid_move?(index)
+    # if index.between?(1,9)
+    #   if !position_taken?(board, index)
+    #     true
+    #   end
+    # end
+    index.between?(0,8) && !position_taken?(@board, index)
+  end
 
+  def turn
+    puts "Please enter 1-9:"
+    input = gets.strip
+    index = input_to_index(input)
+    if valid_move?(index)
+      move(index, current_player(board))
+      display_board
+    else
+      turn
+    end
+  end
 
+  def turn_count
+    @board.count{|token|
+      token == "X" || token == "O"
+    }
+  end
 
   def current_player
     turn_count % 2 == 0 ? "X" : "O"
   end
 
-  def turn_count
-    @board.count{|token| token == "X" || token == "O"}
+  def won?
+    WIN_COMBINATIONS.detect do |combo|
+      @board[combo[0]] == @board[combo[1]] &&
+      @board[combo[1]] == @board[combo[2]] &&
+      position_taken?(combo[0])
+    end
   end
 
+  def full?
+    @board.all?{|token| token == "X" || token == "O"}
+  end
 
+  def draw?
+    full? && !won?
+  end
+
+  def over?
+    won? || full?
+  end
+
+  def winner
+    if won? && @board[won?[0]] == "X"
+      return "X"
+    elsif won? && @board[won?[0]] == "O"
+      return "O"
+    end
+  end
+
+  def play
+  until over? || draw?
+    turn
+  end
+  if won?
+    puts "Congratulations #{winner}!"
+  elsif draw?
+    puts "Cat's Game!"
+  end
 end
